@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react'
-import './App.css'
+import './css/App.css';
 import EmployeeService from "./service/EmployeeService.js";
+import LoginForm from "./LoginForm";
 
 function App() {
   const [employees, setEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userData, setUserData] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  //loading employees at first page renders
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await EmployeeService.getEmployees();
-        setEmployees(response.data);
-        console.log("employee rendered on loading")
-      } catch (error) {
-        console.error("Failed to load employees:", error.message);
-      }
-    };
-    fetchEmployees();
-  },[]);
+    if (isLoggedIn) {
+      EmployeeService.getEmployees()
+        .then(response => setEmployees(response.data))
+        .catch(err => console.error("Failed to load employees:", err.message));
+    }
+
+  }, [isLoggedIn]);
+
+  if (!isLoggedIn) {
+    return <LoginForm onLogin={() => setIsLoggedIn(true)} />;
+  }
+
 
   //delete employee
   const deleteEmployee = (id) => {
@@ -37,7 +39,7 @@ function App() {
     setEditing(true);
   }
 
-    //close model
+  //close model
   const closeModel = () => {
     setIsModalOpen(false)
   }
@@ -129,7 +131,7 @@ function App() {
           </tbody>
         </table>
         {
-        //this is for add record pop up
+          //this is for add record pop up
           isModalOpen && (
             <div className='model'>
               <div className='model-content'>
